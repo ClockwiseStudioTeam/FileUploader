@@ -13,10 +13,11 @@ const app = express();
 // Middleware
 app.use(cors({
   origin: '*',
-  methods: ['GET', 'POST', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: '*',
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  maxAge: 86400
 }));
 
 app.use(express.json());
@@ -70,6 +71,11 @@ const router = express.Router();
 // Test route
 router.get('/', (req, res) => {
   res.json({ message: 'PDF Uploader API is running' });
+});
+
+// Handle preflight requests
+router.options('/upload', (req, res) => {
+  res.status(200).end();
 });
 
 // Upload file route

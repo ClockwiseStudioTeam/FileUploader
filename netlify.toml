@@ -6,6 +6,7 @@
 [functions]
   directory = "functions"
   node_bundler = "esbuild"
+  included_files = ["functions/**/*"]
   external_node_modules = ["express", "mongoose", "multer"]
 
 [[redirects]]
@@ -29,6 +30,7 @@
   for = "/*"
     [headers.values]
     Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
     Access-Control-Allow-Headers = "*"
-    Access-Control-Allow-Credentials = "true" 
+    Access-Control-Allow-Credentials = "true"
+    Access-Control-Max-Age = "86400" 

@@ -7,7 +7,6 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "build": "npm install",
-    "netlify-build": "echo 'No build step needed - this is a Node.js API'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
