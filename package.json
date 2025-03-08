@@ -2,11 +2,11 @@
   "name": "nodejspdfuploader",
   "version": "1.0.0",
   "description": "A Node.js Express API for uploading files and storing them with MongoDB, designed for Webflow integration",
-  "main": "server.js",
+  "main": "functions/api.js",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "build": "mkdir -p dist && cp -r public server.js models routes .env package.json dist/",
+    "build": "npm install",
     "netlify-build": "echo 'No build step needed - this is a Node.js API'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

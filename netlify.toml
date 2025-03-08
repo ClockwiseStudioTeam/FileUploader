@@ -6,7 +6,7 @@
 [functions]
   directory = "functions"
   node_bundler = "esbuild"
-  included_files = ["functions/**/*"]
+  external_node_modules = ["express", "mongoose", "multer"]
 
 [[redirects]]
   from = "/.netlify/functions/api/*"
@@ -30,5 +30,5 @@
     [headers.values]
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Methods = "GET, POST, OPTIONS"
-    Access-Control-Allow-Headers = "Content-Type, Authorization"
+    Access-Control-Allow-Headers = "*"
     Access-Control-Allow-Credentials = "true" 

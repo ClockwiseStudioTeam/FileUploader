@@ -14,10 +14,11 @@ const app = express();
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: '*',
   credentials: true,
   optionsSuccessStatus: 200
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -60,25 +61,8 @@ const File = mongoose.models.File || mongoose.model('File', FileSchema);
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = [
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'image/jpeg',
-      'image/png'
-    ];
-    
-    if (allowedTypes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Invalid file type. Only PDF, Word, Excel, and image files are allowed.'), false);
-    }
-  }
-});
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+}).single('file');
 
 // Routes
 const router = express.Router();
@@ -89,55 +73,63 @@ router.get('/', (req, res) => {
 });
 
 // Upload file route
-router.post('/upload', upload.single('file'), async (req, res) => {
+router.post('/upload', (req, res) => {
   console.log('Upload request received');
-  try {
-    await connectToDatabase();
-    
-    if (!req.file) {
-      console.log('No file uploaded');
-      return res.status(400).json({ error: 'No file uploaded' });
+  
+  upload(req, res, async function(err) {
+    if (err) {
+      console.error('Multer error:', err);
+      return res.status(400).json({ error: err.message });
     }
-
-    const fileUuid = uuidv4();
-    const fileExt = path.extname(req.file.originalname);
-    const filename = `${fileUuid}${fileExt}`;
-    const baseUrl = process.env.BASE_URL || `https://${req.headers.host}`;
-    const fileUrl = `${baseUrl}/api/files/${fileUuid}`;
-
-    console.log('Creating file document:', {
-      filename,
-      originalname: req.file.originalname,
-      size: req.file.size,
-      uuid: fileUuid
-    });
-
-    const file = new File({
-      filename,
-      originalname: req.file.originalname,
-      mimetype: req.file.mimetype,
-      size: req.file.size,
-      uuid: fileUuid,
-      path: `/api/files/${fileUuid}`,
-      url: fileUrl,
-      data: req.file.buffer
-    });
-
-    await file.save();
-    console.log('File saved successfully:', fileUuid);
-
-    return res.status(201).json({
-      success: true,
-      file: {
-        uuid: file.uuid,
-        originalname: file.originalname,
-        url: file.url
+    
+    try {
+      await connectToDatabase();
+      
+      if (!req.file) {
+        console.log('No file uploaded');
+        return res.status(400).json({ error: 'No file uploaded' });
       }
-    });
-  } catch (error) {
-    console.error('File upload error:', error);
-    return res.status(500).json({ error: 'Server error during file upload' });
-  }
+
+      const fileUuid = uuidv4();
+      const fileExt = path.extname(req.file.originalname);
+      const filename = `${fileUuid}${fileExt}`;
+      const baseUrl = process.env.BASE_URL || `https://${req.headers.host}`;
+      const fileUrl = `${baseUrl}/api/files/${fileUuid}`;
+
+      console.log('Creating file document:', {
+        filename,
+        originalname: req.file.originalname,
+        size: req.file.size,
+        uuid: fileUuid
+      });
+
+      const file = new File({
+        filename,
+        originalname: req.file.originalname,
+        mimetype: req.file.mimetype,
+        size: req.file.size,
+        uuid: fileUuid,
+        path: `/api/files/${fileUuid}`,
+        url: fileUrl,
+        data: req.file.buffer
+      });
+
+      await file.save();
+      console.log('File saved successfully:', fileUuid);
+
+      return res.status(201).json({
+        success: true,
+        file: {
+          uuid: file.uuid,
+          originalname: file.originalname,
+          url: file.url
+        }
+      });
+    } catch (error) {
+      console.error('File upload error:', error);
+      return res.status(500).json({ error: 'Server error during file upload' });
+    }
+  });
 });
 
 // Get file by UUID
