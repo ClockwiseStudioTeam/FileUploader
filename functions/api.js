@@ -13,7 +13,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: ['https://trifile.netlify.app', 'https://www.trifile.netlify.app'],
+  origin: 'https://trifile.netlify.app',
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -101,6 +101,7 @@ const upload = multer({
 app.post('/upload', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
+      console.error('No file uploaded');
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
@@ -109,9 +110,18 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     const filename = `${fileUuid}${fileExt}`;
     
     // For Netlify, we'll store the file data in MongoDB directly
-    // In a production environment, you'd want to use a proper file storage service like AWS S3
     const baseUrl = process.env.BASE_URL || `https://${req.headers.host}`;
     const fileUrl = `${baseUrl}/api/files/${fileUuid}`;
+
+    console.log('Creating file document with:', {
+      filename,
+      originalname: req.file.originalname,
+      mimetype: req.file.mimetype,
+      size: req.file.size,
+      uuid: fileUuid,
+      path: `/api/files/${fileUuid}`,
+      url: fileUrl
+    });
 
     // Create a new file document in MongoDB
     const file = new File({
@@ -126,6 +136,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     });
 
     await file.save();
+    console.log('File saved successfully:', fileUuid);
 
     // Return the file information
     return res.status(201).json({
@@ -139,7 +150,10 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     });
   } catch (error) {
     console.error('File upload error:', error);
-    return res.status(500).json({ error: 'Server error during file upload' });
+    return res.status(500).json({ 
+      error: 'Server error during file upload',
+      details: error.message 
+    });
   }
 });
 
