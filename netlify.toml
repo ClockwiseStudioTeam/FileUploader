@@ -6,7 +6,13 @@
 [functions]
   directory = "functions"
   node_bundler = "esbuild"
-  external_node_modules = ["express", "mongoose"]
+  included_files = ["functions/**/*"]
+
+[[redirects]]
+  from = "/.netlify/functions/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+  force = true
 
 [[redirects]]
   from = "/api/*"
@@ -14,10 +20,15 @@
   status = 200
   force = true
 
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
 [[headers]]
   for = "/*"
     [headers.values]
-    Access-Control-Allow-Origin = "https://trifile.netlify.app"
+    Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Methods = "GET, POST, OPTIONS"
     Access-Control-Allow-Headers = "Content-Type, Authorization"
     Access-Control-Allow-Credentials = "true" 

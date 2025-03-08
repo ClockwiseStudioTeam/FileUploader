@@ -12,7 +12,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: 'https://trifile.netlify.app',
+  origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -83,17 +83,19 @@ const upload = multer({
 // Routes
 const router = express.Router();
 
-// Home route
+// Test route
 router.get('/', (req, res) => {
   res.json({ message: 'PDF Uploader API is running' });
 });
 
 // Upload file route
 router.post('/upload', upload.single('file'), async (req, res) => {
+  console.log('Upload request received');
   try {
     await connectToDatabase();
     
     if (!req.file) {
+      console.log('No file uploaded');
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
@@ -102,6 +104,13 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     const filename = `${fileUuid}${fileExt}`;
     const baseUrl = process.env.BASE_URL || `https://${req.headers.host}`;
     const fileUrl = `${baseUrl}/api/files/${fileUuid}`;
+
+    console.log('Creating file document:', {
+      filename,
+      originalname: req.file.originalname,
+      size: req.file.size,
+      uuid: fileUuid
+    });
 
     const file = new File({
       filename,
@@ -115,6 +124,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     });
 
     await file.save();
+    console.log('File saved successfully:', fileUuid);
 
     return res.status(201).json({
       success: true,
