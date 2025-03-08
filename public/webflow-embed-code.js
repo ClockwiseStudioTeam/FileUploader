@@ -3,7 +3,7 @@
 
 document.addEventListener('DOMContentLoaded', function() {
   // Configuration - Replace with your actual API URL
-  const API_URL = 'https://your-api-domain.com/api/upload';
+  const API_URL = 'https://your-netlify-site.netlify.app/.netlify/functions/api/upload';
   
   // Create and append the upload container to the target element
   // Replace 'file-upload-target' with the ID of your Webflow element

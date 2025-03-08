@@ -30,6 +30,10 @@ const FileSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  data: {
+    type: Buffer,
+    required: false
+  },
   createdAt: {
     type: Date,
     default: Date.now
